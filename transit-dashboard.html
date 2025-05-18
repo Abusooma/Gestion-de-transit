@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TransitEase - Tableau de Bord</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Chart.js -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #1a73e8;
+        --secondary-color: #f5f7fa;
+        --accent-color: #34a853;
+        --text-color: #202124;
+        --light-text: #5f6368;
+        --border-color: #dadce0;
+        --success-color: #34a853;
+        --warning-color: #fbbc04;
+        --danger-color: #ea4335;
+        --info-color: #4285f4;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        color: var(--text-color);
+      }
+
+      .sidebar {
+        background-color: white;
+        min-height: 100vh;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        padding-top: 1rem;
+      }
+
+      .logo-container {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .logo-container img {
+        width: 40px;
+        margin-right: 10px;
+      }
+
+      .logo-container h4 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--primary-color);
+        font-size: 1.5rem;
+      }
+
+      .nav-link {
+        color: var(--light-text);
+        padding: 0.75rem 1.5rem;
+        border-radius: 0;
+        margin-bottom: 0.25rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+      }
+
+      .nav-link:hover,
+      .nav-link.active {
+        background-color: rgba(26, 115, 232, 0.1);
+        color: var(--primary-color);
+        border-left: 3px solid var(--primary-color);
+      }
+
+      .nav-link i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .content-wrapper {
+        padding: 1.5rem;
+      }
+
+      .page-title {
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--text-color);
+        font-size: 1.75rem;
+      }
+
+      .stats-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s;
+      }
+
+      .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .stats-card .icon {
+        background-color: rgba(26, 115, 232, 0.1);
+        color: var(--primary-color);
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .stats-card.warning .icon {
+        background-color: rgba(251, 188, 4, 0.1);
+        color: var(--warning-color);
+      }
+
+      .stats-card.success .icon {
+        background-color: rgba(52, 168, 83, 0.1);
+        color: var(--success-color);
+      }
+
+      .stats-card.danger .icon {
+        background-color: rgba(234, 67, 53, 0.1);
+        color: var(--danger-color);
+      }
+
+      .stats-card h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .stats-card p {
+        color: var(--light-text);
+        margin-bottom: 0;
+        font-size: 0.9rem;
+      }
+
+      .card-title {
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+        font-size: 1.2rem;
+      }
+
+      .timeline {
+        position: relative;
+        padding-left: 40px;
+      }
+
+      .timeline:before {
+        content: "";
+        position: absolute;
+        left: 10px;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background-color: var(--border-color);
+      }
+
+      .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+      }
+
+      .timeline-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .timeline-item:before {
+        content: "";
+        position: absolute;
+        left: -40px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: white;
+        border: 2px solid var(--primary-color);
+      }
+
+      .timeline-item.completed:before {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+      }
+
+      .timeline-item.in-progress:before {
+        background-color: var(--warning-color);
+        border-color: var(--warning-color);
+      }
+
+      .timeline-item.pending:before {
+        background-color: var(--light-text);
+        border-color: var(--light-text);
+      }
+
+      .timeline-date {
+        font-size: 0.8rem;
+        color: var(--light-text);
+        margin-bottom: 0.25rem;
+      }
+
+      .timeline-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+
+      .timeline-text {
+        font-size: 0.9rem;
+        color: var(--light-text);
+      }
+
+      .container-status {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border-left: 5px solid;
+        background-color: #fafafa;
+        margin-bottom: 1rem;
+      }
+
+      .container-status.delivered {
+        border-left-color: var(--success-color);
+      }
+
+      .container-status.in-transit {
+        border-left-color: var(--info-color);
+      }
+
+      .container-status.customs {
+        border-left-color: var(--warning-color);
+      }
+
+      .container-status .status-icon {
+        margin-right: 1rem;
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .container-status.delivered .status-icon {
+        background-color: rgba(52, 168, 83, 0.1);
+        color: var(--success-color);
+      }
+
+      .container-status.in-transit .status-icon {
+        background-color: rgba(66, 133, 244, 0.1);
+        color: var(--info-color);
+      }
+
+      .container-status.customs .status-icon {
+        background-color: rgba(251, 188, 4, 0.1);
+        color: var(--warning-color);
+      }
+
+      .container-status .status-text {
+        flex: 1;
+      }
+
+      .container-status h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .container-status p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--light-text);
+      }
+
+      .quick-action-btn {
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+      }
+
+      .quick-action-btn i {
+        margin-right: 10px;
+      }
+
+      .search-tracking {
+        position: relative;
+      }
+
+      .search-tracking input {
+        padding-left: 40px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-tracking i {
+        position: absolute;
+        left: 15px;
+        top: 13px;
+        color: var(--light-text);
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 1rem;
+      }
+
+      .user-details h5 {
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .user-details p {
+        margin: 0;
+        color: var(--light-text);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 992px) {
+        .sidebar {
+          min-height: auto;
+        }
+      }
+
+      #progressChart,
+      #surestariesChart {
+        max-height: 200px;
+      }
+
+      .notification-badge {
+        position: relative;
+      }
+
+      .notification-badge .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.6rem;
+      }
+
+      .table-containers th {
+        font-weight: 600;
+        color: var(--light-text);
+        font-size: 0.9rem;
+      }
+
+      .table-containers td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+      }
+
+      .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+
+      .status-badge.delivered {
+        background-color: rgba(52, 168, 83, 0.1);
+        color: var(--success-color);
+      }
+
+      .status-badge.transit {
+        background-color: rgba(66, 133, 244, 0.1);
+        color: var(--info-color);
+      }
+
+      .status-badge.customs {
+        background-color: rgba(251, 188, 4, 0.1);
+        color: var(--warning-color);
+      }
+
+      .status-badge.delayed {
+        background-color: rgba(234, 67, 53, 0.1);
+        color: var(--danger-color);
+      }
+
+      .header-nav {
+        background-color: white;
+        padding: 0.75rem 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+      }
+
+      .header-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--secondary-color);
+        color: var(--light-text);
+        margin-left: 0.75rem;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .language-selector {
+        display: flex;
+        align-items: center;
+        margin-left: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        background-color: var(--secondary-color);
+        cursor: pointer;
+      }
+
+      .language-selector img {
+        width: 20px;
+        margin-right: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-2 sidebar d-none d-lg-block">
+          <div class="logo-container">
+            <div class="logo-placeholder">
+              <i class="fas fa-ship text-primary fs-2"></i>
+            </div>
+            <h4>TransitEase</h4>
+          </div>
+
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="#">
+                <i class="fas fa-tachometer-alt"></i> Tableau de bord
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-truck-container"></i> Expéditions
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-file-invoice"></i> Douanes
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-ship"></i> Surestaries
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-boxes"></i> Conteneurs
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-users"></i> Clients
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-chart-line"></i> Rapports
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-bell"></i> Notifications
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-cog"></i> Paramètres
+              </a>
+            </li>
+          </ul>
+
+          <div class="mt-auto p-3">
+            <div class="user-info">
+              <div class="user-avatar">KD</div>
+              <div class="user-details">
+                <h5>Konan Didier</h5>
+                <p>Transitaire</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10 col-md-12 content-wrapper">
+          <!-- Header Nav -->
+          <div class="header-nav">
+            <div>
+              <h4 class="mb-0">Tableau de bord</h4>
+            </div>
+
+            <div class="header-actions">
+              <div class="search-tracking me-3">
+                <i class="fas fa-search"></i>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Rechercher un numéro de suivi..."
+                />
+              </div>
+
+              <div class="header-icon notification-badge">
+                <i class="fas fa-bell"></i>
+                <span class="badge bg-danger rounded-circle">3</span>
+              </div>
+
+              <div class="header-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+
+              <div class="language-selector">
+                <span>FR</span>
+                <i class="fas fa-chevron-down ms-2"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="row">
+            <div class="col-xl-3 col-md-6">
+              <div class="stats-card">
+                <div class="icon">
+                  <i class="fas fa-shipping-fast"></i>
+                </div>
+                <h3>24</h3>
+                <p>Expéditions actives</p>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <div class="stats-card warning">
+                <div class="icon">
+                  <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <h3>12</h3>
+                <p>Dossiers en douane</p>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <div class="stats-card success">
+                <div class="icon">
+                  <i class="fas fa-boxes"></i>
+                </div>
+                <h3>47</h3>
+                <p>Conteneurs en suivi</p>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+              <div class="stats-card danger">
+                <div class="icon">
+                  <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3>5</h3>
+                <p>Alertes surestaries</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content Rows -->
+          <div class="row mt-4">
+            <!-- Tracking Status Column -->
+            <div class="col-lg-8">
+              <!-- Recent Shipments -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">Expéditions récentes</h5>
+                  <div class="table-responsive">
+                    <table class="table table-hover table-containers">
+                      <thead>
+                        <tr>
+                          <th>N° Conteneur</th>
+                          <th>Client</th>
+                          <th>Origine/Destination</th>
+                          <th>Date estimée</th>
+                          <th>Statut</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>CMAU4587632</td>
+                          <td>Diallo Trading</td>
+                          <td>Shanghai → Abidjan</td>
+                          <td>20/05/2025</td>
+                          <td>
+                            <span class="status-badge transit">En transit</span>
+                          </td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary">
+                              Détails
+                            </button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>MSDU7856412</td>
+                          <td>SenImport SARL</td>
+                          <td>Hambourg → Dakar</td>
+                          <td>25/05/2025</td>
+                          <td>
+                            <span class="status-badge customs">En douane</span>
+                          </td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary">
+                              Détails
+                            </button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>MAEU5478963</td>
+                          <td>Ivory Electronics</td>
+                          <td>Dubai → Abidjan</td>
+                          <td>18/05/2025</td>
+                          <td>
+                            <span class="status-badge delivered">Livré</span>
+                          </td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary">
+                              Détails
+                            </button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>TCNU4152639</td>
+                          <td>Koné Imports</td>
+                          <td>Rotterdam → Lomé</td>
+                          <td>19/05/2025</td>
+                          <td>
+                            <span class="status-badge delayed">Retardé</span>
+                          </td>
+                          <td>
+                            <button class="btn btn-sm btn-outline-primary">
+                              Détails
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tracking Performance -->
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h5 class="card-title">Progression des dédouanements</h5>
+                      <canvas id="progressChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="card mb-4">
+                    <div class="card-body">
+                      <h5 class="card-title">Surestaries par mois</h5>
+                      <canvas id="surestariesChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Container Tracking Status -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">Statut des conteneurs</h5>
+
+                  <div class="container-status in-transit">
+                    <div class="status-icon">
+                      <i class="fas fa-ship"></i>
+                    </div>
+                    <div class="status-text">
+                      <h5>CMAU4587632 - En transit maritime</h5>
+                      <p>Shanghai → Abidjan | Arrivée prévue: 20/05/2025</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary">
+                      Détails
+                    </button>
+                  </div>
+
+                  <div class="container-status customs">
+                    <div class="status-icon">
+                      <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div class="status-text">
+                      <h5>MSDU7856412 - En cours de dédouanement</h5>
+                      <p>Port de Dakar | Documentation en cours</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary">
+                      Détails
+                    </button>
+                  </div>
+
+                  <div class="container-status delivered">
+                    <div class="status-icon">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="status-text">
+                      <h5>MAEU5478963 - Livré au client</h5>
+                      <p>Ivory Electronics | Livré le: 18/05/2025</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary">
+                      Détails
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Sidebar Column -->
+            <div class="col-lg-4">
+              <!-- Quick Actions -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">Actions rapides</h5>
+
+                  <button class="btn btn-primary quick-action-btn w-100">
+                    <i class="fas fa-plus-circle"></i> Nouvelle expédition
+                  </button>
+
+                  <button
+                    class="btn btn-outline-primary quick-action-btn w-100"
+                  >
+                    <i class="fas fa-file-alt"></i> Créer un dossier douane
+                  </button>
+
+                  <button
+                    class="btn btn-outline-primary quick-action-btn w-100"
+                  >
+                    <i class="fas fa-search"></i> Vérifier surestaries
+                  </button>
+
+                  <button
+                    class="btn btn-outline-primary quick-action-btn w-100"
+                  >
+                    <i class="fas fa-download"></i> Exporter rapport
+                  </button>
+                </div>
+              </div>
+
+              <!-- Recent Notifications -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">Notifications récentes</h5>
+
+                  <div class="timeline">
+                    <div class="timeline-item completed">
+                      <p class="timeline-date">Aujourd'hui, 10:25</p>
+                      <h6 class="timeline-title">
+                        Conteneur MAEU5478963 livré
+                      </h6>
+                      <p class="timeline-text">
+                        Le conteneur a été livré avec succès au client Ivory
+                        Electronics.
+                      </p>
+                    </div>
+
+                    <div class="timeline-item in-progress">
+                      <p class="timeline-date">Aujourd'hui, 09:15</p>
+                      <h6 class="timeline-title">Alerte surestarie</h6>
+                      <p class="timeline-text">
+                        Le conteneur TCNU4152639 approche de la limite de
+                        franchise.
+                      </p>
+                    </div>
+
+                    <div class="timeline-item pending">
+                      <p class="timeline-date">Hier, 16:30</p>
+                      <h6 class="timeline-title">Document manquant</h6>
+                      <p class="timeline-text">
+                        Facture commerciale manquante pour le dossier
+                        MSDU7856412.
+                      </p>
+                    </div>
+
+                    <div class="timeline-item completed">
+                      <p class="timeline-date">Hier, 14:10</p>
+                      <h6 class="timeline-title">Dédouanement terminé</h6>
+                      <p class="timeline-text">
+                        Le dossier SEN-2025-458 a été validé par les douanes.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Upcoming Arrivals -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <h5 class="card-title">Arrivées prochaines</h5>
+
+                  <ul class="list-group list-group-flush">
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <small class="d-block text-muted">CMAU4587632</small>
+                        <span>Shanghai → Abidjan</span>
+                      </div>
+                      <span class="badge bg-primary rounded-pill">20 Mai</span>
+                    </li>
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <small class="d-block text-muted">MSDU7856412</small>
+                        <span>Hambourg → Dakar</span>
+                      </div>
+                      <span class="badge bg-primary rounded-pill">25 Mai</span>
+                    </li>
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center"
+                    >
+                      <div>
+                        <small class="d-block text-muted">TCNU4152639</small>
+                        <span>Rotterdam → Lomé</span>
+                      </div>
+                      <span class="badge bg-warning rounded-pill">Retardé</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Custom JS for dashboard -->
+    <script>
+      // Initialize charts when DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        // Progress Chart
+        const progressCtx = document
+          .getElementById("progressChart")
+          .getContext("2d");
+        const progressChart = new Chart(progressCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["Complétés", "En cours", "En attente"],
+            datasets: [
+              {
+                data: [65, 25, 10],
+                backgroundColor: ["#34a853", "#fbbc04", "#dadce0"],
+                borderWidth: 0,
+                cutout: "75%",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: {
+                  usePointStyle: true,
+                  padding: 15,
+                  font: {
+                    size: 11,
+                  },
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return context.label + ": " + context.raw + "%";
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // Surestaries Chart
+        const surestariesCtx = document
+          .getElementById("surestariesChart")
+          .getContext("2d");
+        const surestariesChart = new Chart(surestariesCtx, {
+          type: "bar",
+          data: {
+            labels: ["Jan", "Fév", "Mar", "Avr", "Mai"],
+            datasets: [
+              {
+                label: "Montant (€)",
+                data: [12500, 19000, 15000, 21000, 18000],
+                backgroundColor: "rgba(26, 115, 232, 0.7)",
+                borderRadius: 5,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return value.toLocaleString() + "€";
+                  },
+                },
+              },
+              x: {
+                grid: {
+                  display: false,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      // Search functionality
+      const searchInput = document.querySelector(".search-tracking input");
+      searchInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          const trackingNumber = this.value.trim();
+          if (trackingNumber) {
+            showTrackingNotification(trackingNumber);
+          }
+        }
+      });
+
+      // Show tracking notification
+      function showTrackingNotification(trackingNumber) {
+        // Create notification element
+        const notification = document.createElement("div");
+        notification.className = "toast show position-fixed bottom-0 end-0 m-3";
+        notification.setAttribute("role", "alert");
+        notification.setAttribute("aria-live", "assertive");
+        notification.setAttribute("aria-atomic", "true");
+        notification.style.zIndex = "1050";
+        notification.style.minWidth = "300px";
+
+        notification.innerHTML = `
+                <div class="toast-header">
+                    <strong class="me-auto"><i class="fas fa-search me-2"></i>Recherche de tracking</strong>
+                    <small>Maintenant</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <p class="mb-1">Recherche du numéro: <strong>${trackingNumber}</strong></p>
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    <span>Chargement des informations...</span>
+                </div>
+            `;
+
+        document.body.appendChild(notification);
+
+        // Simulate search and remove after timeout
+        setTimeout(() => {
+          notification.remove();
+
+          // Show tracking result
+          if (trackingNumber.toUpperCase() === "CMAU4587632") {
+            showContainerDetail("CMAU4587632");
+          } else {
+            // Show not found notification
+            const notFoundNotification = document.createElement("div");
+            notFoundNotification.className =
+              "toast show position-fixed bottom-0 end-0 m-3";
+            notFoundNotification.setAttribute("role", "alert");
+            notFoundNotification.setAttribute("aria-live", "assertive");
+            notFoundNotification.setAttribute("aria-atomic", "true");
+            notFoundNotification.style.zIndex = "1050";
+            notFoundNotification.style.minWidth = "300px";
+
+            notFoundNotification.innerHTML = `
+                        <div class="toast-header bg-warning text-white">
+                            <strong class="me-auto"><i class="fas fa-exclamation-triangle me-2"></i>Résultat de recherche</strong>
+                            <small>Maintenant</small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            <p>Aucune information trouvée pour le numéro <strong>${trackingNumber}</strong>.</p>
+                            <p class="mb-0">Veuillez vérifier le numéro et réessayer.</p>
+                        </div>
+                    `;
+
+            document.body.appendChild(notFoundNotification);
+
+            setTimeout(() => {
+              notFoundNotification.remove();
+            }, 5000);
+          }
+        }, 2000);
+      }
+
+      // Show container detail modal
+      function showContainerDetail(containerId) {
+        // Create modal element
+        const modal = document.createElement("div");
+        modal.className = "modal fade";
+        modal.id = "containerDetailModal";
+        modal.setAttribute("tabindex", "-1");
+        modal.setAttribute("aria-labelledby", "containerDetailModalLabel");
+        modal.setAttribute("aria-hidden", "true");
+
+        let containerData = {
+          CMAU4587632: {
+            client: "Diallo Trading",
+            route: "Shanghai → Abidjan",
+            statusLabel: "En transit",
+            statusClass: "transit",
+            eta: "20/05/2025",
+            vessel: "MSC CLARA",
+            booking: "MSHDJ8473927",
+            lastUpdate: "15/05/2025 - 08:30",
+            lastPort: "Port Said",
+            nextPort: "Abidjan",
+            events: [
+              {
+                date: "02/05/2025",
+                event: "Départ du port de Shanghai",
+                status: "Complété",
+              },
+              {
+                date: "08/05/2025",
+                event: "Arrivée à Port Said",
+                status: "Complété",
+              },
+              {
+                date: "10/05/2025",
+                event: "Départ de Port Said",
+                status: "Complété",
+              },
+              {
+                date: "20/05/2025",
+                event: "Arrivée prévue à Abidjan",
+                status: "En cours",
+              },
+              {
+                date: "22/05/2025",
+                event: "Procédures douanières",
+                status: "En attente",
+              },
+              {
+                date: "25/05/2025",
+                event: "Livraison prévue",
+                status: "En attente",
+              },
+            ],
+          },
+        };
+
+        let container = containerData[containerId];
+
+        modal.innerHTML = `
+                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="containerDetailModalLabel">
+                                Détails du conteneur ${containerId}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-status ${
+                              container.statusClass
+                            } mb-4">
+                                <div class="status-icon">
+                                    <i class="fas fa-ship"></i>
+                                </div>
+                                <div class="status-text">
+                                    <h5>${containerId} - ${
+          container.statusLabel
+        }</h5>
+                                    <p>${container.route} | Arrivée prévue: ${
+          container.eta
+        }</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Informations générales</h6>
+                                            <table class="table table-sm">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>Client:</th>
+                                                        <td>${
+                                                          container.client
+                                                        }</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Booking:</th>
+                                                        <td>${
+                                                          container.booking
+                                                        }</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Navire:</th>
+                                                        <td>${
+                                                          container.vessel
+                                                        }</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>ETA:</th>
+                                                        <td>${
+                                                          container.eta
+                                                        }</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Dernière mise à jour:</th>
+                                                        <td>${
+                                                          container.lastUpdate
+                                                        }</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Position actuelle</h6>
+                                            <div class="text-center mb-3">
+                                                <i class="fas fa-ship text-primary" style="font-size: 3rem;"></i>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="text-center">
+                                                    <strong>${
+                                                      container.lastPort
+                                                    }</strong>
+                                                    <br>
+                                                    <small>Dernier port</small>
+                                                </div>
+                                                <div class="progress flex-grow-1 mx-2" style="height: 5px;">
+                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 60%"></div>
+                                                </div>
+                                                <div class="text-center">
+                                                    <strong>${
+                                                      container.nextPort
+                                                    }</strong>
+                                                    <br>
+                                                    <small>Prochain port</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6 class="mb-3">Chronologie du conteneur</h6>
+                            <div class="timeline">
+                                ${container.events
+                                  .map(
+                                    (event) => `
+                                    <div class="timeline-item ${
+                                      event.status === "Complété"
+                                        ? "completed"
+                                        : event.status === "En cours"
+                                        ? "in-progress"
+                                        : "pending"
+                                    }">
+                                        <p class="timeline-date">${
+                                          event.date
+                                        }</p>
+                                        <h6 class="timeline-title">${
+                                          event.event
+                                        }</h6>
+                                        <p class="timeline-text">Statut: ${
+                                          event.status
+                                        }</p>
+                                    </div>
+                                `
+                                  )
+                                  .join("")}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            <button type="button" class="btn btn-primary">
+                                <i class="fas fa-file-pdf me-1"></i> Exporter le rapport
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        document.body.appendChild(modal);
+
+        // Initialize and show modal
+        const containerModal = new bootstrap.Modal(modal);
+        containerModal.show();
+
+        // Remove modal from DOM after it's hidden
+        modal.addEventListener("hidden.bs.modal", function () {
+          modal.remove();
+        });
+      }
+
+      // Initialize detail buttons
+      document.querySelectorAll(".btn-outline-primary").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          // Get container ID from closest row or container status
+          let containerId;
+          if (this.closest("tr")) {
+            containerId =
+              this.closest("tr").querySelector("td:first-child").textContent;
+          } else if (this.closest(".container-status")) {
+            containerId = this.closest(".container-status")
+              .querySelector("h5")
+              .textContent.split(" - ")[0];
+          }
+
+          if (containerId) {
+            showContainerDetail(containerId);
+          }
+        });
+      });
+
+      // Notification click handling
+      document
+        .querySelector(".notification-badge")
+        .addEventListener("click", function () {
+          const notificationsDropdown = document.createElement("div");
+          notificationsDropdown.className =
+            "dropdown-menu dropdown-menu-end p-0 show";
+          notificationsDropdown.style.position = "absolute";
+          notificationsDropdown.style.transform =
+            "translate3d(-250px, 45px, 0px)";
+          notificationsDropdown.style.top = "0px";
+          notificationsDropdown.style.left = "0px";
+          notificationsDropdown.style.willChange = "transform";
+          notificationsDropdown.style.minWidth = "320px";
+          notificationsDropdown.style.boxShadow =
+            "0 0.5rem 1rem rgba(0, 0, 0, 0.15)";
+          notificationsDropdown.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h6 class="mb-0">Notifications</h6>
+                    <span class="badge bg-primary rounded-pill">3 nouvelles</span>
+                </div>
+                <div class="notifications-list p-0">
+                    <a href="#" class="dropdown-item p-3 border-bottom d-flex align-items-center bg-light">
+                        <div class="flex-shrink-0">
+                            <div class="icon-circle bg-primary text-white">
+                                <i class="fas fa-shipping-fast"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <div class="small text-muted">Aujourd'hui, 10:25</div>
+                            <div class="fw-bold">Conteneur MAEU5478963 livré</div>
+                            <div class="text-truncate" style="max-width: 200px;">Le conteneur a été livré avec succès au client Ivory Electronics.</div>
+                        </div>
+                    </a>
+                    <a href="#" class="dropdown-item p-3 border-bottom d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="icon-circle bg-warning text-white">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <div class="small text-muted">Aujourd'hui, 09:15</div>
+                            <div class="fw-bold">Alerte surestarie</div>
+                            <div class="text-truncate" style="max-width: 200px;">Le conteneur TCNU4152639 approche de la limite de franchise.</div>
+                        </div>
+                    </a>
+                    <a href="#" class="dropdown-item p-3 d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="icon-circle bg-danger text-white">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                        </div>
+                        <div class="ms-3">
+                            <div class="small text-muted">Hier, 16:30</div>
+                            <div class="fw-bold">Document manquant</div>
+                            <div class="text-truncate" style="max-width: 200px;">Facture commerciale manquante pour le dossier MSDU7856412.</div>
+                        </div>
+                    </a>
+                </div>
+                <a href="#" class="dropdown-item text-center small text-muted p-3 border-top">Afficher toutes les notifications</a>
+            `;
+
+          // Append to notification icon container
+          this.appendChild(notificationsDropdown);
+
+          // Add click event to document to close dropdown
+          const closeDropdown = function (e) {
+            if (
+              !notificationsDropdown.contains(e.target) &&
+              !document.querySelector(".notification-badge").contains(e.target)
+            ) {
+              notificationsDropdown.remove();
+              document.removeEventListener("click", closeDropdown);
+            }
+          };
+
+          // Delay adding the event to prevent immediate closure
+          setTimeout(() => {
+            document.addEventListener("click", closeDropdown);
+          }, 100);
+        });
+
+      // Mobile sidebar toggle
+      function addMobileSidebar() {
+        // Add toggle button to header on mobile
+        if (window.innerWidth < 992) {
+          const headerNav = document.querySelector(".header-nav");
+
+          if (!document.querySelector(".sidebar-toggle")) {
+            const toggleButton = document.createElement("button");
+            toggleButton.className = "btn sidebar-toggle d-lg-none";
+            toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
+            toggleButton.style.marginRight = "10px";
+
+            headerNav.firstElementChild.prepend(toggleButton);
+
+            // Create mobile sidebar
+            const mobileSidebar = document.createElement("div");
+            mobileSidebar.className = "offcanvas offcanvas-start";
+            mobileSidebar.id = "mobileSidebar";
+
+            // Clone sidebar content for mobile
+            const sidebarContent = document
+              .querySelector(".sidebar")
+              .cloneNode(true);
+
+            mobileSidebar.innerHTML = `
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title">TransitEase</h5>
+                            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            ${sidebarContent.innerHTML}
+                        </div>
+                    `;
+
+            document.body.appendChild(mobileSidebar);
+
+            // Add event listener to toggle button
+            toggleButton.addEventListener("click", function () {
+              const bsOffcanvas = new bootstrap.Offcanvas(
+                document.getElementById("mobileSidebar")
+              );
+              bsOffcanvas.show();
+            });
+          }
+        }
+      }
+
+      // Call once on load
+      addMobileSidebar();
+
+      // Call on window resize
+      window.addEventListener("resize", addMobileSidebar);
+    </script>
+  </body>
+</html>
